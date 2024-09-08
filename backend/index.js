@@ -12,7 +12,7 @@ app.use(cors());
 app.use(bodyParser.json());
 
 // Connect to MongoDB (replace with your MongoDB connection string)
-mongoose.connect("mongodb+srv://kapildhavale602:kapil10849@connectiontemplate.vricl.mongodb.net/?retryWrites=true&w=majority&appName=connectiontemplate", { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.connect("mongodb+srv://kapildhavale602:<password>@connectiontemplate.vricl.mongodb.net/?retryWrites=true&w=majority&appName=connectiontemplate", { useNewUrlParser: true, useUnifiedTopology: true });
 
 
 // Endpoint to receive data and store it in MongoDB
