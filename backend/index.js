@@ -1,48 +1,63 @@
 const express = require('express');
-const bodyParser = require('body-parser');
-const cors = require('cors');
+const http = require('http');
+const socketIo = require('socket.io');
 const mongoose = require('mongoose');
-const SensorData = require('./model'); // Import your MongoDB model
+const cors = require('cors'); // Import CORS middleware
+const SensorData = require('./model'); // Import the Mongoose model
+require('dotenv').config(); 
 
 const app = express();
-const port = 3001;
+const server = http.createServer(app);
+const io = socketIo(server, {
+  cors: {
+    origin: "http://localhost:3000", // Allow requests from frontend
+    methods: ["GET", "POST"]
+  }
+});
 
-// Middleware
-app.use(cors());
-app.use(bodyParser.json());
+app.use(cors()); // Enable CORS for all routes
+app.use(express.json());
 
-// Connect to MongoDB (replace with your MongoDB connection string)
-mongoose.connect("mongodb+srv://kapildhavale602:<password>@connectiontemplate.vricl.mongodb.net/?retryWrites=true&w=majority&appName=connectiontemplate", { useNewUrlParser: true, useUnifiedTopology: true });
+// MongoDB Connection
+const mongoUri = process.env.MONGO_URI; // Replace with your MongoDB URI
+mongoose.connect(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log('Connected to MongoDB'))
+  .catch(err => console.error('MongoDB connection error:', err));
 
+// WebSocket connection handler
+io.on('connection', (socket) => {
+  console.log('New WebSocket connection');
+});
 
-// Endpoint to receive data and store it in MongoDB
+// API endpoint to receive data via POST request
 app.post('/data', async (req, res) => {
   try {
-    const receivedData = req.body;
+    const newData = req.body;
 
-    // Create a new document in MongoDB
-    const sensorData = new SensorData(receivedData);
-    await sensorData.save(); // Save the data to MongoDB
+    // Save data to MongoDB
+    const sensorData = new SensorData(newData);
+    await sensorData.save();
 
-    console.log('Data saved to MongoDB:', receivedData);
-    res.status(200).send('Data received and saved to MongoDB');
-  } catch (error) {
-    console.error('Error saving data:', error);
-    res.status(500).send('Error saving data');
+    // Emit the new data to connected WebSocket clients
+    io.emit('newData', newData);
+
+    res.status(200).send('Data received and sent to WebSocket');
+  } catch (err) {
+    res.status(500).send('Error saving data to MongoDB');
   }
 });
 
-// Endpoint to fetch data from MongoDB
+// API endpoint to retrieve data via GET request
 app.get('/data', async (req, res) => {
   try {
-    const data = await SensorData.find(); // Fetch all data from MongoDB
-    res.json(data); // Send data to frontend
-  } catch (error) {
-    console.error('Error fetching data:', error);
-    res.status(500).send('Error fetching data');
+    // Fetch data from MongoDB
+    const data = await SensorData.find();
+    res.json(data);
+  } catch (err) {
+    res.status(500).send('Error fetching data from MongoDB');
   }
 });
 
-app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
+server.listen(3001, () => {
+  console.log('Server listening on port 3001');
 });
