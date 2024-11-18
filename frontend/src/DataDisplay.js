@@ -50,15 +50,21 @@ const DataDisplay = () => {
         <div className="data-grid">
           {data.map((item, index) => (
             <div key={index} className="data-card">
-              <h3 className="data-title">Data Entry {index + 1}</h3>
+              <h3 className="data-title">Box ID: {item.boxId}</h3>
               <ul className="data-list">
-                {Object.entries(item).map(([key, value]) => (
-                  <li key={key} className="data-item">
-                    <strong>{key}:</strong> {typeof value === 'object' && value !== null 
-                      ? JSON.stringify(value) // Convert object to string for rendering
-                      : value} {/* Render the value directly if it's not an object */}
+                <li className="data-item"><strong>AQI:</strong> {item.aqi}</li>
+                <li className="data-item"><strong>PM2.5:</strong> {item.pm2_5}</li>
+                <li className="data-item"><strong>PM10:</strong> {item.pm10}</li>
+                <li className="data-item"><strong>Temperature:</strong> {item.temperature}°C</li>
+                <li className="data-item"><strong>Humidity:</strong> {item.humidity}%</li>
+                {item.location && item.location.latitude && item.location.longitude ? (
+                  <li className="data-item">
+                    <strong>Location:</strong> ({item.location.latitude}, {item.location.longitude})
                   </li>
-                ))}
+                ) : (
+                  <li className="data-item"><strong>Location:</strong> Not Available</li>
+                )}
+                <li className="data-item"><strong>Timestamp:</strong> {new Date(item.timestamp).toLocaleString()}</li>
               </ul>
             </div>
           ))}

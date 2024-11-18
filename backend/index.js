@@ -2,9 +2,9 @@ const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
 const mongoose = require('mongoose');
-const cors = require('cors'); // Import CORS middleware
+const cors = require('cors');
 const SensorData = require('./model'); // Import the Mongoose model
-require('dotenv').config(); 
+require('dotenv').config();
 
 const app = express();
 const server = http.createServer(app);
@@ -19,7 +19,7 @@ app.use(cors()); // Enable CORS for all routes
 app.use(express.json());
 
 // MongoDB Connection
-const mongoUri = process.env.MONGO_URI; // Replace with your MongoDB URI
+const mongoUri = process.env.MONGO_URI;
 mongoose.connect(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('MongoDB connection error:', err));
