@@ -2,15 +2,15 @@ const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
 const mongoose = require('mongoose');
-const cors = require('cors'); // Import CORS middleware
+const cors = require('cors');
 const SensorData = require('./model'); // Import the Mongoose model
-require('dotenv').config(); 
+require('dotenv').config();
 
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: "http://localhost:3000", // Allow requests from frontend
+    origin: ["http://localhost:3000", "http://localhost:3002"], // Allow requests from both frontend ports
     methods: ["GET", "POST"]
   }
 });
@@ -19,7 +19,7 @@ app.use(cors()); // Enable CORS for all routes
 app.use(express.json());
 
 // MongoDB Connection
-const mongoUri = process.env.MONGO_URI; // Replace with your MongoDB URI
+const mongoUri = process.env.MONGO_URI;
 mongoose.connect(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('MongoDB connection error:', err));
@@ -34,6 +34,13 @@ app.post('/data', async (req, res) => {
   try {
     const newData = req.body;
 
+    // Add timestamp if not already present
+    if (!newData.timestamp) {
+      newData.timestamp = new Date().toISOString(); // Use ISO format timestamp
+    }
+
+    console.log("Received data: ", newData);  // Log the data for debugging
+
     // Save data to MongoDB
     const sensorData = new SensorData(newData);
     await sensorData.save();
@@ -43,6 +50,7 @@ app.post('/data', async (req, res) => {
 
     res.status(200).send('Data received and sent to WebSocket');
   } catch (err) {
+    console.error('Error saving data:', err);
     res.status(500).send('Error saving data to MongoDB');
   }
 });
@@ -54,6 +62,7 @@ app.get('/data', async (req, res) => {
     const data = await SensorData.find();
     res.json(data);
   } catch (err) {
+    console.error('Error fetching data:', err);
     res.status(500).send('Error fetching data from MongoDB');
   }
 });

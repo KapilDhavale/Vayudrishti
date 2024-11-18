@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const DataDisplay = ({ socket }) => {
-  const [data, setData] = useState([]);
+const CardDisplayPage = ({ socket }) => {
+  const [data, setData] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
@@ -12,7 +12,12 @@ const DataDisplay = ({ socket }) => {
     fetch('http://localhost:3001/data')
       .then(response => response.json())
       .then(data => {
-        setData(data);
+        // Transform the data into an object keyed by boxId
+        const initialData = data.reduce((acc, item) => {
+          acc[item.boxId] = item;
+          return acc;
+        }, {});
+        setData(initialData);
         setLoading(false);
       })
       .catch(error => {
@@ -24,7 +29,10 @@ const DataDisplay = ({ socket }) => {
     // Listen for new data from WebSocket
     if (socket) {
       socket.on('newData', (newData) => {
-        setData(prevData => [...prevData, newData]);
+        setData(prevData => ({
+          ...prevData,
+          [newData.boxId]: newData, // Update the data for the existing card or add a new one
+        }));
       });
     }
 
@@ -34,6 +42,15 @@ const DataDisplay = ({ socket }) => {
       }
     };
   }, [socket]);
+
+  // Utility function to format timestamp
+  const formatTimestamp = (timestamp) => {
+    const date = new Date(timestamp);
+    if (isNaN(date.getTime())) {
+      return 'Invalid Date'; // Fallback if date is invalid
+    }
+    return date.toLocaleString(); // Format date to local string
+  };
 
   if (loading) {
     return <p className="loading">Loading...</p>;
@@ -45,7 +62,7 @@ const DataDisplay = ({ socket }) => {
 
   return (
     <div className="container">
-      <h2 className="title">Received Data</h2>
+      <h2 className="title">Box Data</h2>
 
       {/* Link to Logout */}
       <button 
@@ -63,28 +80,12 @@ const DataDisplay = ({ socket }) => {
         Logout
       </button>
 
-      {/* Button to navigate to CardDisplayPage */}
-      <button 
-        onClick={() => navigate('/cards')} 
-        style={{
-          padding: '10px 20px',
-          backgroundColor: '#007bff', // Blue for the new button
-          color: 'white',
-          border: 'none',
-          borderRadius: '5px',
-          cursor: 'pointer',
-          marginBottom: '20px',
-        }}
-      >
-        View Cards
-      </button>
-
-      {data.length === 0 ? (
+      {Object.keys(data).length === 0 ? (
         <p className="no-data">No data available</p>
       ) : (
         <div className="data-grid">
-          {data.map((item, index) => (
-            <div key={index} className="data-card">
+          {Object.values(data).map((item) => (
+            <div key={item.boxId} className="data-card"> {/* Use boxId as key */}
               <h3 className="data-title">Box ID: {item.boxId}</h3>
               <ul className="data-list">
                 <li className="data-item"><strong>AQI:</strong> {item.aqi}</li>
@@ -99,7 +100,7 @@ const DataDisplay = ({ socket }) => {
                 ) : (
                   <li className="data-item"><strong>Location:</strong> Not Available</li>
                 )}
-                <li className="data-item"><strong>Timestamp:</strong> {new Date(item.timestamp).toLocaleString()}</li>
+                <li className="data-item"><strong>Timestamp:</strong> {formatTimestamp(item.timestamp)}</li>
               </ul>
             </div>
           ))}
@@ -109,4 +110,4 @@ const DataDisplay = ({ socket }) => {
   );
 };
 
-export default DataDisplay;
+export default CardDisplayPage;
