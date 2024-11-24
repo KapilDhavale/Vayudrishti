@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const sensorDataSchema = new mongoose.Schema({
   deviceID: { type: String, required: true },
@@ -12,6 +12,6 @@ const sensorDataSchema = new mongoose.Schema({
   timestamp: { type: Date, default: Date.now },
 });
 
-const SensorData = mongoose.model('SensorData', sensorDataSchema);
+const SensorData = mongoose.model("SensorData", sensorDataSchema);
 
 module.exports = SensorData;

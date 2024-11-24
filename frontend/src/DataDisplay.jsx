@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const DataDisplay = ({ socket }) => {
   const [data, setData] = useState([]);
@@ -9,34 +9,34 @@ const DataDisplay = ({ socket }) => {
 
   useEffect(() => {
     // Fetch initial data from the backend (GET /data)
-    fetch('http://localhost:3001/data')
-      .then(response => {
+    fetch("http://localhost:3001/data")
+      .then((response) => {
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
         return response.json();
       })
-      .then(data => {
+      .then((data) => {
         setData(data);
         setLoading(false);
       })
-      .catch(error => {
-        console.error('Error fetching data:', error);
+      .catch((error) => {
+        console.error("Error fetching data:", error);
         setError(error);
         setLoading(false);
       });
 
     // Listen for new data from WebSocket
     if (socket) {
-      socket.on('newData', (newData) => {
-        setData(prevData => [newData, ...prevData]);  // Adds new data at the beginning
+      socket.on("newData", (newData) => {
+        setData((prevData) => [newData, ...prevData]); // Adds new data at the beginning
       });
     }
 
     // Clean up the WebSocket listener when the component unmounts
     return () => {
       if (socket) {
-        socket.off('newData');
+        socket.off("newData");
       }
     };
   }, [socket]);
@@ -54,32 +54,32 @@ const DataDisplay = ({ socket }) => {
       <h2 className="title">Received Data</h2>
 
       {/* Link to Logout */}
-      <button 
-        onClick={() => navigate('/logout')} 
+      <button
+        onClick={() => navigate("/logout")}
         style={{
-          padding: '10px 20px',
-          backgroundColor: '#dc3545', // Red for logout
-          color: 'white',
-          border: 'none',
-          borderRadius: '5px',
-          cursor: 'pointer',
-          marginBottom: '20px',
+          padding: "10px 20px",
+          backgroundColor: "#dc3545", // Red for logout
+          color: "white",
+          border: "none",
+          borderRadius: "5px",
+          cursor: "pointer",
+          marginBottom: "20px",
         }}
       >
         Logout
       </button>
 
       {/* Button to navigate to CardDisplayPage */}
-      <button 
-        onClick={() => navigate('/cards')} 
+      <button
+        onClick={() => navigate("/cards")}
         style={{
-          padding: '10px 20px',
-          backgroundColor: '#007bff', // Blue for the new button
-          color: 'white',
-          border: 'none',
-          borderRadius: '5px',
-          cursor: 'pointer',
-          marginBottom: '20px',
+          padding: "10px 20px",
+          backgroundColor: "#007bff", // Blue for the new button
+          color: "white",
+          border: "none",
+          borderRadius: "5px",
+          cursor: "pointer",
+          marginBottom: "20px",
         }}
       >
         View Cards
@@ -93,21 +93,43 @@ const DataDisplay = ({ socket }) => {
             <div key={index} className="data-card">
               <h3 className="data-title">Device ID: {item.deviceID}</h3>
               <ul className="data-list">
-                <li className="data-item"><strong>AQI:</strong> {item.AQI}</li>
-                <li className="data-item"><strong>PM2.5:</strong> {item.PM25}</li>
-                <li className="data-item"><strong>PM10:</strong> {item.PM10}</li>
-                <li className="data-item"><strong>NO2:</strong> {item.NO2}</li>
-                <li className="data-item"><strong>SO2:</strong> {item.SO2}</li>
-                <li className="data-item"><strong>CO:</strong> {item.CO}</li>
-                <li className="data-item"><strong>O3:</strong> {item.O3}</li>
-                {item.location && item.location.latitude && item.location.longitude ? (
+                <li className="data-item">
+                  <strong>AQI:</strong> {item.AQI}
+                </li>
+                <li className="data-item">
+                  <strong>PM2.5:</strong> {item.PM25}
+                </li>
+                <li className="data-item">
+                  <strong>PM10:</strong> {item.PM10}
+                </li>
+                <li className="data-item">
+                  <strong>NO2:</strong> {item.NO2}
+                </li>
+                <li className="data-item">
+                  <strong>SO2:</strong> {item.SO2}
+                </li>
+                <li className="data-item">
+                  <strong>CO:</strong> {item.CO}
+                </li>
+                <li className="data-item">
+                  <strong>O3:</strong> {item.O3}
+                </li>
+                {item.location &&
+                item.location.latitude &&
+                item.location.longitude ? (
                   <li className="data-item">
-                    <strong>Location:</strong> ({item.location.latitude}, {item.location.longitude})
+                    <strong>Location:</strong> ({item.location.latitude},{" "}
+                    {item.location.longitude})
                   </li>
                 ) : (
-                  <li className="data-item"><strong>Location:</strong> Not Available</li>
+                  <li className="data-item">
+                    <strong>Location:</strong> Not Available
+                  </li>
                 )}
-                <li className="data-item"><strong>Timestamp:</strong> {new Date(item.timestamp).toLocaleString()}</li>
+                <li className="data-item">
+                  <strong>Timestamp:</strong>{" "}
+                  {new Date(item.timestamp).toLocaleString()}
+                </li>
               </ul>
             </div>
           ))}

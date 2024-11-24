@@ -22,7 +22,9 @@ body {
   color: #333;
 }
 
-.loading, .no-data, .error {
+.loading,
+.no-data,
+.error {
   text-align: center;
   font-size: 1.2em;
   color: #999;
