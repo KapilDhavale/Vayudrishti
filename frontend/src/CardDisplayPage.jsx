@@ -10,11 +10,16 @@ const CardDisplayPage = ({ socket }) => {
   useEffect(() => {
     // Fetch initial data from the backend
     fetch('http://localhost:3001/data')
-      .then(response => response.json())
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+      })
       .then(data => {
         // Transform the data into an object keyed by boxId
         const initialData = data.reduce((acc, item) => {
-          acc[item.boxId] = item;
+          acc[item.deviceID] = item; // Use deviceID instead of boxId if needed
           return acc;
         }, {});
         setData(initialData);
@@ -31,7 +36,7 @@ const CardDisplayPage = ({ socket }) => {
       socket.on('newData', (newData) => {
         setData(prevData => ({
           ...prevData,
-          [newData.boxId]: newData, // Update the data for the existing card or add a new one
+          [newData.deviceID]: newData, // Update the data for the existing device or add a new one
         }));
       });
     }
@@ -62,7 +67,7 @@ const CardDisplayPage = ({ socket }) => {
 
   return (
     <div className="container">
-      <h2 className="title">Box Data</h2>
+      <h2 className="title">Device Data</h2>
 
       {/* Link to Logout */}
       <button 
@@ -85,12 +90,16 @@ const CardDisplayPage = ({ socket }) => {
       ) : (
         <div className="data-grid">
           {Object.values(data).map((item) => (
-            <div key={item.boxId} className="data-card"> {/* Use boxId as key */}
-              <h3 className="data-title">Box ID: {item.boxId}</h3>
+            <div key={item.deviceID} className="data-card"> {/* Use deviceID as key */}
+              <h3 className="data-title">Device ID: {item.deviceID}</h3>
               <ul className="data-list">
-                <li className="data-item"><strong>AQI:</strong> {item.aqi}</li>
-                <li className="data-item"><strong>PM2.5:</strong> {item.pm2_5}</li>
-                <li className="data-item"><strong>PM10:</strong> {item.pm10}</li>
+                <li className="data-item"><strong>AQI:</strong> {item.AQI}</li>
+                <li className="data-item"><strong>PM2.5:</strong> {item.PM25}</li>
+                <li className="data-item"><strong>PM10:</strong> {item.PM10}</li>
+                <li className="data-item"><strong>NO2:</strong> {item.NO2}</li>
+                <li className="data-item"><strong>SO2:</strong> {item.SO2}</li>
+                <li className="data-item"><strong>CO:</strong> {item.CO}</li>
+                <li className="data-item"><strong>O3:</strong> {item.O3}</li>
                 <li className="data-item"><strong>Temperature:</strong> {item.temperature}°C</li>
                 <li className="data-item"><strong>Humidity:</strong> {item.humidity}%</li>
                 {item.location && item.location.latitude && item.location.longitude ? (
