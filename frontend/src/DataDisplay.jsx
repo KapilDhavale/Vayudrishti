@@ -8,9 +8,14 @@ const DataDisplay = ({ socket }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Fetch initial data from the backend
+    // Fetch initial data from the backend (GET /data)
     fetch('http://localhost:3001/data')
-      .then(response => response.json())
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+      })
       .then(data => {
         setData(data);
         setLoading(false);
@@ -24,13 +29,14 @@ const DataDisplay = ({ socket }) => {
     // Listen for new data from WebSocket
     if (socket) {
       socket.on('newData', (newData) => {
-        setData(prevData => [...prevData, newData]);
+        setData(prevData => [newData, ...prevData]);  // Adds new data at the beginning
       });
     }
 
+    // Clean up the WebSocket listener when the component unmounts
     return () => {
       if (socket) {
-        socket.off('newData'); // Clean up the listener when component unmounts
+        socket.off('newData');
       }
     };
   }, [socket]);
@@ -85,13 +91,15 @@ const DataDisplay = ({ socket }) => {
         <div className="data-grid">
           {data.map((item, index) => (
             <div key={index} className="data-card">
-              <h3 className="data-title">Box ID: {item.boxId}</h3>
+              <h3 className="data-title">Device ID: {item.deviceID}</h3>
               <ul className="data-list">
-                <li className="data-item"><strong>AQI:</strong> {item.aqi}</li>
-                <li className="data-item"><strong>PM2.5:</strong> {item.pm2_5}</li>
-                <li className="data-item"><strong>PM10:</strong> {item.pm10}</li>
-                <li className="data-item"><strong>Temperature:</strong> {item.temperature}°C</li>
-                <li className="data-item"><strong>Humidity:</strong> {item.humidity}%</li>
+                <li className="data-item"><strong>AQI:</strong> {item.AQI}</li>
+                <li className="data-item"><strong>PM2.5:</strong> {item.PM25}</li>
+                <li className="data-item"><strong>PM10:</strong> {item.PM10}</li>
+                <li className="data-item"><strong>NO2:</strong> {item.NO2}</li>
+                <li className="data-item"><strong>SO2:</strong> {item.SO2}</li>
+                <li className="data-item"><strong>CO:</strong> {item.CO}</li>
+                <li className="data-item"><strong>O3:</strong> {item.O3}</li>
                 {item.location && item.location.latitude && item.location.longitude ? (
                   <li className="data-item">
                     <strong>Location:</strong> ({item.location.latitude}, {item.location.longitude})
