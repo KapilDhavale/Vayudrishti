@@ -1,7 +1,7 @@
 // src/Logout.js
-import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom'; // To redirect after logout
-import { getAuth, signOut } from 'firebase/auth'; // Firebase Auth
+import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom"; // To redirect after logout
+import { getAuth, signOut } from "firebase/auth"; // Firebase Auth
 
 const Logout = () => {
   const navigate = useNavigate();
@@ -12,10 +12,10 @@ const Logout = () => {
     signOut(auth)
       .then(() => {
         // Redirect to login page after successful logout
-        navigate('/login');
+        navigate("/login");
       })
       .catch((error) => {
-        console.error('Error signing out: ', error);
+        console.error("Error signing out: ", error);
       });
   }, [navigate]);
 

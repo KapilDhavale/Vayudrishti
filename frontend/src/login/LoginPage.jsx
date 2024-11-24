@@ -12,10 +12,10 @@ function LoginPage() {
     e.preventDefault();
     signInWithEmailAndPassword(auth, email, password)
       .then(() => {
-        window.location.href = "/dashboard";  // Redirect to dashboard directly
+        window.location.href = "/dashboard"; // Redirect to dashboard directly
       })
       .catch((error) => {
-        console.error("Error:", error.message);  
+        console.error("Error:", error.message);
       });
   };
 
@@ -24,10 +24,8 @@ function LoginPage() {
       {/* Transparent overlay */}
       <div className="overlay"></div>
 
-      <div id="vayudrishti">
-        VayuDrishti
-      </div>
-      
+      <div id="vayudrishti">VayuDrishti</div>
+
       <form onSubmit={handleLogin}>
         {/* Wrap form fields in the new container */}
         <div className="form-content">
@@ -57,7 +55,9 @@ function LoginPage() {
         </div>
 
         <button type="submit">Login</button>
-        <p><a href="/forgot-password">Forgot Password?</a></p>
+        <p>
+          <a href="/forgot-password">Forgot Password?</a>
+        </p>
       </form>
     </div>
   );
