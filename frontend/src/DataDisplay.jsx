@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import './DataDisplay.css'; // Import the CSS file
 
 const DataDisplay = ({ socket }) => {
   const [data, setData] = useState([]);
@@ -80,100 +81,124 @@ const DataDisplay = ({ socket }) => {
   }
 
   return (
-    <div className="container">
-      <h2 className="title">Received Data</h2>
+    <div className="dashboard-container">
+      {/* Side Panel */}
+      <div className="sidebar">
+        <h4 className="sidebar-title">Menu</h4>
+        <ul className="sidebar-menu">
+          <li>
+            <button
+              onClick={() => navigate("/logout")}
+              className="btn btn-danger sidebar-btn"
+            >
+              Logout
+            </button>
+          </li>
+          <li>
+            <button
+              onClick={() => navigate("/cards")}
+              className="btn btn-primary sidebar-btn"
+            >
+              View Cards
+            </button>
+          </li>
+        </ul>
+      </div>
 
-      {/* Link to Logout */}
-      <button
-        onClick={() => navigate("/logout")}
-        style={{
-          padding: "10px 20px",
-          backgroundColor: "#dc3545", // Red for logout
-          color: "white",
-          border: "none",
-          borderRadius: "5px",
-          cursor: "pointer",
-          marginBottom: "20px",
-        }}
-      >
-        Logout
-      </button>
-
-      {/* Button to navigate to CardDisplayPage */}
-      <button
-        onClick={() => navigate("/cards")}
-        style={{
-          padding: "10px 20px",
-          backgroundColor: "#007bff", // Blue for the new button
-          color: "white",
-          border: "none",
-          borderRadius: "5px",
-          cursor: "pointer",
-          marginBottom: "20px",
-        }}
-      >
-        View Cards
-      </button>
-
-      {Object.keys(groupedData).length === 0 ? (
-        <p className="no-data">No data available</p>
-      ) : (
-        <div className="location-container">
-          {Object.keys(groupedData).map((location, index) => (
-            <div key={index} className="location-group">
-              <h3 className="location-title">{location}</h3>
-              <div className="data-grid">
-                {groupedData[location].map((item, index) => (
-                  <div key={index} className="data-card">
-                    <h3 className="data-title">Device ID: {item.deviceID}</h3>
-                    <ul className="data-list">
-                      <li className="data-item">
-                        <strong>AQI:</strong> {item.AQI}
-                      </li>
-                      <li className="data-item">
-                        <strong>PM2.5:</strong> {item.PM25}
-                      </li>
-                      <li className="data-item">
-                        <strong>PM10:</strong> {item.PM10}
-                      </li>
-                      <li className="data-item">
-                        <strong>NO2:</strong> {item.NO2}
-                      </li>
-                      <li className="data-item">
-                        <strong>SO2:</strong> {item.SO2}
-                      </li>
-                      <li className="data-item">
-                        <strong>CO:</strong> {item.CO}
-                      </li>
-                      <li className="data-item">
-                        <strong>O3:</strong> {item.O3}
-                      </li>
-                      {/* Handle location as an object */}
-                      <li className="data-item">
-                        <strong>Location:</strong> 
-                        {item.location ? (
-                          <>
-                            <p>Name: {item.location.name}</p>
-                            <p>Latitude: {item.location.latitude}</p>
-                            <p>Longitude: {item.location.longitude}</p>
-                            <p>Radius: {item.location.radius} km</p>
-                          </>
-                        ) : (
-                          "Not Available"
-                        )}
-                      </li>
-                      <li className="data-item">
-                        <strong>Timestamp:</strong>{" "}
-                        {new Date(item.timestamp).toLocaleString()}
-                      </li>
-                    </ul>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
+      {/* Main Content Area */}
+      <div className="main-content">
+        {/* Navbar */}
+        <div className="navbar">
+          <h2>Dashboard</h2>
+          <nav className="navbar-nav">
+            <ul className="navbar-links">
+              <li>
+                <button onClick={() => navigate("/database")} className="navbar-link">
+                  Database
+                </button>
+              </li>
+              <li>
+                <button onClick={() => navigate("/analytics")} className="navbar-link">
+                  Analytics
+                </button>
+              </li>
+              <li>
+                <button onClick={() => navigate("/maps")} className="navbar-link">
+                  Maps
+                </button>
+              </li>
+              <li>
+                <button onClick={() => navigate("/social-media")} className="navbar-link">
+                  Social Media Analytics
+                </button>
+              </li>
+            </ul>
+          </nav>
         </div>
-      )}
+
+        {/* Main dashboard content */}
+        <div className="dashboard-content">
+          {Object.keys(groupedData).length === 0 ? (
+            <p className="no-data">No data available</p>
+          ) : (
+            <div className="location-container">
+              {Object.keys(groupedData).map((location, index) => (
+                <div key={index} className="location-group card">
+                  <h3 className="location-title">{location}</h3>
+                  <div className="data-grid">
+                    {groupedData[location].map((item, index) => (
+                      <div key={index} className="data-card card">
+                        <h4 className="data-title">Device ID: {item.deviceID}</h4>
+                        <ul className="data-list">
+                          <li className="data-item">
+                            <strong>AQI:</strong> {item.AQI}
+                          </li>
+                          <li className="data-item">
+                            <strong>PM2.5:</strong> {item.PM25}
+                          </li>
+                          <li className="data-item">
+                            <strong>PM10:</strong> {item.PM10}
+                          </li>
+                          <li className="data-item">
+                            <strong>NO2:</strong> {item.NO2}
+                          </li>
+                          <li className="data-item">
+                            <strong>SO2:</strong> {item.SO2}
+                          </li>
+                          <li className="data-item">
+                            <strong>CO:</strong> {item.CO}
+                          </li>
+                          <li className="data-item">
+                            <strong>O3:</strong> {item.O3}
+                          </li>
+                          {/* Handle location as an object */}
+                          <li className="data-item">
+                            <strong>Location:</strong> 
+                            {item.location ? (
+                              <>
+                                <p>Name: {item.location.name}</p>
+                                <p>Latitude: {item.location.latitude}</p>
+                                <p>Longitude: {item.location.longitude}</p>
+                                <p>Radius: {item.location.radius} km</p>
+                              </>
+                            ) : (
+                              "Not Available"
+                            )}
+                          </li>
+                          <li className="data-item">
+                            <strong>Timestamp:</strong>{" "}
+                            {new Date(item.timestamp).toLocaleString()}
+                          </li>
+                        </ul>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 };
