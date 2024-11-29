@@ -21,7 +21,7 @@ function ForgotPasswordPage() {
 
   return (
     <div className="forgotpassword">
-       <div className="overlay"></div>
+      <div className="overlay"></div>
       <div id="forgot"> Forgot Password</div>
       <form id="forgot-password-form" onSubmit={handleResetPassword}>
         <div className="forgot-input-container">
@@ -37,10 +37,9 @@ function ForgotPasswordPage() {
         </div>
         <button type="submit">Reset Password</button>
         <p>
-        <a href="/login">Back to Login</a>
-      </p>
+          <a href="/login">Back to Login</a>
+        </p>
       </form>
-      
     </div>
   );
 }

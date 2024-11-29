@@ -1,20 +1,29 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const SensorData = require('../models/model');
-const { calculateAQI } = require('../services/aqiCalculation');  // Import AQI calculation service
+const SensorData = require("../models/model");
+const { calculateAQI } = require("../services/aqiCalculation"); // Import AQI calculation service
 
 // POST route to receive sensor data and calculate AQI
-router.post('/data', async (req, res) => {
+router.post("/data", async (req, res) => {
   try {
     const newData = req.body;
 
     // Check if all necessary parameters are present
-    if (!newData.PM25 || !newData.PM10 || !newData.NO2 || !newData.SO2 || !newData.CO || !newData.O3) {
-      return res.status(400).send('Missing sensor data');
+    if (
+      !newData.PM25 ||
+      !newData.PM10 ||
+      !newData.NO2 ||
+      !newData.SO2 ||
+      !newData.CO ||
+      !newData.O3
+    ) {
+      return res.status(400).send("Missing sensor data");
     }
 
     // Fetch previous data for averaging (based on timestamp or deviceID)
-    const previousData = await SensorData.find({ deviceID: newData.deviceID }).sort({ timestamp: -1 }).limit(10); // Example: fetch last 10 entries
+    const previousData = await SensorData.find({ deviceID: newData.deviceID })
+      .sort({ timestamp: -1 })
+      .limit(10); // Example: fetch last 10 entries
 
     let averageData = {
       PM25: 0,
@@ -69,12 +78,14 @@ router.post('/data', async (req, res) => {
     await sensorData.save();
 
     // Emit the new data to WebSocket clients
-    io.emit('newData', newData);
+    io.emit("newData", newData);
 
-    res.status(200).send('Data received, AQI calculated, and sent to WebSocket');
+    res
+      .status(200)
+      .send("Data received, AQI calculated, and sent to WebSocket");
   } catch (err) {
-    console.error('Error saving data:', err);
-    res.status(500).send('Error saving data to MongoDB');
+    console.error("Error saving data:", err);
+    res.status(500).send("Error saving data to MongoDB");
   }
 });
 

@@ -19,7 +19,7 @@ function SignupPage() {
 
     createUserWithEmailAndPassword(auth, email, password)
       .then(() => {
-        window.location.href = "/dashboard";  // Redirect to dashboard directly after signup
+        window.location.href = "/dashboard"; // Redirect to dashboard directly after signup
       })
       .catch((error) => {
         console.error("Error:", error.message);
@@ -31,10 +31,8 @@ function SignupPage() {
       {/* Transparent overlay */}
       <div className="overlay"></div>
 
-      <div id="vayudrishti">
-        VayuDrishti
-      </div>
-      
+      <div id="vayudrishti">VayuDrishti</div>
+
       <form onSubmit={handleSignup}>
         {/* Wrap form fields in the new container */}
         <div className="signup-form-content">
@@ -76,7 +74,9 @@ function SignupPage() {
         </div>
 
         <button type="submit">Sign Up</button>
-        <p><a href="/login">Already have an account? Log in</a></p>
+        <p>
+          <a href="/login">Already have an account? Log in</a>
+        </p>
       </form>
     </div>
   );
