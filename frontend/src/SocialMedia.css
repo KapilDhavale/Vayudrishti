@@ -1,0 +1,380 @@
+/* Reset default margins and paddings */
+#social-container {
+    font-family: "Inter","Cambria";
+    background-color: #ffffff;
+    color: #333;
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+    margin-top: 65px; /* Ensure body elements stack vertically */
+  }
+  
+  #socialform-header {
+    width: 100%;
+    height: 17vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    /* background-color: aqua; */
+    font-size: 4vh;
+    padding-left: 25px;
+    font-family: "Inter";
+  }
+  
+  #head-social {
+    width: 100%;
+    font-weight: 700;
+    font-size: 5vh;
+    /* background-color: chartreuse; */
+  }
+  
+  #social-text {
+    width: 50%;
+    font-size: 3vh;
+    /* background-color: rgb(40, 169, 198); */
+  }
+  
+
+  #head-end{
+    width: 50%;
+    /* background-color: #45a049; */
+    display: flex;
+    justify-content: flex-end;
+    padding-right: 10px;
+    font-size: 15px;
+  }
+  #form-news {
+    width: 100%;
+    height: 130vh;
+    /* background-color: darkgoldenrod; */
+    border-bottom: 3px solid rgb(229, 229, 229);
+    display: flex;
+    flex-direction: row;
+    color:black;
+  }
+  
+  #magcha-form-cha-div {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    color:black;
+
+    /* background-color: blueviolet; */
+  }
+  
+  #social-news {
+    width: 100%;
+    height: 100%;
+    color:black;
+
+    /* background-color: rgb(43, 159, 226); */
+  }
+  
+  #social-form{
+    display: flex;
+    width: 100%;
+    border-radius: 0;
+    background-color: transparent;
+    color: #333; /* Set text color for the form text */
+    border: none; /* Remove any default borders */
+    box-shadow: none;
+  }
+  
+  #social-form input,
+  #social-form textarea,
+  #social-form select,
+  #social-form button {
+    background-color: transparent; /* Reset background color for form inputs */
+    border: 1px solid #ccc; /* Add custom borders */
+    color: #333; /* Set text color for input elements */
+  }
+  
+  #social-form input:focus,
+  #social-form textarea:focus,
+  #social-form select:focus {
+    border-color: #4A90E2; /* Set custom focus border color */
+    outline: none; /* Remove default outline */
+  }
+  
+  #Q1-form,
+  #Q2-form,
+  #Q3-form,
+  #Q4-form,
+  #Q5-form,
+  #Q6-form
+   {
+    display: flex;
+    flex-direction:column;
+    text-align: start;
+    /* background-color: #4CAF50; */
+    width: 100%;
+    text-align: left  ;
+    justify-content: center;
+    align-items: flex-start;
+    height: auto;
+    color: black;
+    padding: 6px 0;
+  }
+  
+  #social-button-1{
+    padding: 10px 20px;
+    border:1px solid #ccc;
+    background-color: white;
+    cursor: pointer;
+    border-radius: 5px;
+  }
+  /* styles.css */
+  .button-group {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    margin-top: 10px;
+    /* background-color: #45a049; */
+  }
+  
+  #social-button {
+    padding: 10px 20px;
+    border:1px solid #ccc;
+    /* background-color: white; */
+    cursor: pointer;
+    border-radius: 5px;
+  }
+  
+  #social-button.selected {
+    background-color: #4CAF50; /* Green */
+    color: white;
+  }
+  
+  #social-button:hover {
+    background-color: #e66262;
+  }
+
+
+
+
+  
+  #Q6 {
+    margin-top: 20px;
+    font-family: Arial, sans-serif;
+  }
+
+
+
+  
+  textarea {
+    width: 100%;
+    height: 120px; /* Adjust the height as per your preference */
+    padding: 10px;
+    font-size: 16px;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    resize: vertical; /* Allows resizing only vertically */
+    box-sizing: border-box; /* Ensures padding and borders are included in width/height */
+    transition: all 0.3s ease; /* Smooth transition for focus */
+  }
+  
+  textarea:focus {
+    border-color: #4CAF50; /* Green border on focus */
+    background-color: #fff; /* White background on focus */
+    box-shadow: 0 0 8px rgba(76, 175, 80, 0.2); /* Subtle shadow effect */
+  }
+  
+  textarea::placeholder {
+    color: #aaa; /* Lighter placeholder text color */
+    font-style: italic;
+  }
+  
+  #social-analytics-submit {
+    padding: 12px 25px;
+    font-size: 16px;
+    font-weight: bold;
+    color: white;
+    background-color: #4CAF50; /* Green background */
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease; /* Smooth transition for hover effects */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+  }
+  
+  #social-analytics-submit:hover {
+    background-color: #45a049; /* Darker green on hover */
+    transform: translateY(-2px); /* Slight lift effect */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); /* Enhanced shadow on hover */
+  }
+  
+  
+  .news-section {
+    display: flex;
+    flex-direction:column;
+    height: auto;
+    width: 90%;
+    /* background-color: #4A90E2; */
+    font-family: 'Inter';
+    align-items: center;
+  }
+
+  #news-head{
+    /* background-color: #45a049; */
+    padding: 3px;
+    font-size: 1.7vw;
+  }
+
+  .news-item{
+    border: 1px solid #a39a81;
+    background-color: #fff7e2;
+    border-radius: 3px;
+    padding: 9px;
+    margin: 4px;
+
+  }
+  #prev-news-button{
+    border: 1px solid grey;
+    margin: 1px;
+
+  }
+  #next-news-button{
+    background-color: #333;
+    color: #ffff;
+    margin: 1px;
+
+  }
+
+  #next-news-button:hover{
+    background-color: #121212;
+
+  }
+
+
+  
+
+  /* Container for the graph */
+#social-analytice-graph {
+  padding: 20px;
+  background-color: #f9f9f9; /* Light background for the graph container */
+  border-radius: 10px;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+  width: 80%; /* Make sure the graph is responsive */
+  margin: 20px auto;
+}
+
+/* Title for the graph */
+#social-analytics-charts h2 {
+  font-family: 'Arial', sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: #333; /* Dark color for the title */
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+/* Chart wrapper for better spacing */
+.chart-container {
+  position: relative;
+  height: 400px; /* Adjust the height as needed */
+}
+
+/* Hover effect on chart */
+canvas:hover {
+  cursor: pointer;
+}
+
+/* Custom legend styling */
+.chart-legend {
+  display: flex;
+  justify-content: space-around;
+  padding: 10px;
+  font-size: 14px;
+  background-color: #f4f4f4;
+  border-radius: 5px;
+}
+
+/* Custom color for legend items */
+.chart-legend .legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chart-legend .legend-item span {
+  display: block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+
+  #social-analytics-feedback {
+    font-family: Arial, sans-serif;
+    background-color: #f9f9f9;
+    padding: 20px;
+  }
+  
+  #social-analytics-feedback p {
+    font-size: 1.2em;
+    font-weight: bold;
+  }
+  
+  .feedback-box {
+    background-color: #fff;
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    padding: 15px;
+    margin: 10px 0;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    font-size: 1em;
+    transition: all 0.3s ease;
+  }
+  
+  .feedback-box:hover {
+    background-color: #f0f0f0;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  .feedback-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9em;
+    color: #555;
+  }
+  
+  .feedback-header strong {
+    font-weight: bold;
+  }
+  
+  .feedback-date {
+    color: #888;
+  }
+  
+  .feedback-message {
+    margin-top: 10px;
+    font-size: 1.1em;
+  }
+  
+  .feedback-rating {
+    margin-top: 10px;
+    font-size: 0.9em;
+    color: #4CAF50;
+  }
+  
+  .feedback-sentiment {
+    margin-top: 10px;
+    font-size: 0.9em;
+    color: #ff9800; /* Yellow for sentiment */
+  }
+  
+  .feedback-box strong {
+    font-weight: bold;
+  }
+  
+
+
+  #divider{
+    width:100%;
+    height: 10px;
+  }
