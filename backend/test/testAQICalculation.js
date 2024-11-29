@@ -1,4 +1,4 @@
-const { getClosestLocation } = require('../utils/utils'); // Adjust the relative path
+const { getClosestLocation } = require("../utils/utils"); // Adjust the relative path
 const readline = require("readline");
 
 const rl = readline.createInterface({
@@ -8,7 +8,10 @@ const rl = readline.createInterface({
 
 rl.question("Enter latitude: ", (latitude) => {
   rl.question("Enter longitude: ", (longitude) => {
-    const result = getClosestLocation(parseFloat(latitude), parseFloat(longitude));
+    const result = getClosestLocation(
+      parseFloat(latitude),
+      parseFloat(longitude),
+    );
 
     if (result) {
       console.log(`Device is at or near ${result.name}`);

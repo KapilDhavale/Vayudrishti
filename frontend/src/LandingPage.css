@@ -1,21 +1,20 @@
 /* Main container for the landing page */
 #landing-page {
-    width: 100%; /* Full width of the viewport */
-    height: 100%; /* Full height of the viewport */
-    display: flex; /* Flexbox for easy alignment */
-    flex-direction: column;
-    z-index: 0;
-  }
+  width: 100%; /* Full width of the viewport */
+  height: 100%; /* Full height of the viewport */
+  display: flex; /* Flexbox for easy alignment */
+  flex-direction: column;
+  z-index: 0;
+}
 
-  #landing-image {
-    width: 100%;
-    height: 70vh;
-    position: relative; /* Allows us to position child elements inside this container */
-    background-image: url('/public/images/landing-page.png'); /* Path from public directory */
-    background-size: cover; /* Ensure the image covers the entire container */
-    background-position: center; /* Center the background image */
-  }
-  
+#landing-image {
+  width: 100%;
+  height: 70vh;
+  position: relative; /* Allows us to position child elements inside this container */
+  background-image: url("/public/images/landing-page.png"); /* Path from public directory */
+  background-size: cover; /* Ensure the image covers the entire container */
+  background-position: center; /* Center the background image */
+}
 
 #landing-buttons {
   width: 100%;
@@ -82,9 +81,7 @@
   margin: 20px 0px;
   border-radius: 16px;
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1); /* Adds a shadow effect */
-  border: solid 1px #0483D1;
-
-
+  border: solid 1px #0483d1;
 }
 
 #landing-card2 {
@@ -97,23 +94,20 @@
   border-radius: 16px;
   align-items: center;
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1); /* Adds a shadow effect */
-  border: solid 1px #CECFD0;
-
-
+  border: solid 1px #cecfd0;
 }
 
 #landing-card3 {
-    display: flex;
-    flex-direction: column;
-    width: 25%;
-    height: 400px;
-    background-color: #ffffff;
-    margin: 20px 0px;
-    border-radius: 16px;
-    align-items: center;
-    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1); /* Adds a shadow effect */
-    border: solid 1px #CECFD0;
-
+  display: flex;
+  flex-direction: column;
+  width: 25%;
+  height: 400px;
+  background-color: #ffffff;
+  margin: 20px 0px;
+  border-radius: 16px;
+  align-items: center;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1); /* Adds a shadow effect */
+  border: solid 1px #cecfd0;
 }
 
 #card1-head {
@@ -156,68 +150,71 @@
   font-weight: 500;
 }
 
-#card-2-3-text{
-    display: flex;
+#card-2-3-text {
+  display: flex;
   padding: 40px 20px;
   align-items: center;
   /* background-color: #10e49d; */
   text-align: justify;
-
 }
 
 /* Hover effect for card 1 */
 #landing-card1:hover {
-    transform: scale(1.1); /* Slightly enlarges the card */
-    transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth transition */
-    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1); /* Adds a shadow effect */
-  }
-  
-  /* Hover effect for card 2 */
-  #landing-card2:hover {
-    transform: scale(1.1); /* Slightly enlarges the card */
-    transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth transition */
-    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1); /* Adds a shadow effect */
-  }
-  
-  /* Hover effect for card 3 */
-  #landing-card3:hover {
-    transform: scale(1.1); /* Slightly enlarges the card */
-    transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth transition */
-    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1); /* Adds a shadow effect */
-  }
-  
+  transform: scale(1.1); /* Slightly enlarges the card */
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease; /* Smooth transition */
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1); /* Adds a shadow effect */
+}
 
-  /* Style the scrollbar itself */
+/* Hover effect for card 2 */
+#landing-card2:hover {
+  transform: scale(1.1); /* Slightly enlarges the card */
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease; /* Smooth transition */
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1); /* Adds a shadow effect */
+}
+
+/* Hover effect for card 3 */
+#landing-card3:hover {
+  transform: scale(1.1); /* Slightly enlarges the card */
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease; /* Smooth transition */
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1); /* Adds a shadow effect */
+}
+
+/* Style the scrollbar itself */
 ::-webkit-scrollbar {
-    width: 12px;  /* Vertical scrollbar width */
-    height: 12px; /* Horizontal scrollbar height */
-  }
-  
-  /* Style the scrollbar track (background) */
-  ::-webkit-scrollbar-track {
-    background: #f1f1f1; /* Light grey track */
-    border-radius: 10px;  /* Rounded corners */
-  }
-  
-  /* Style the scrollbar thumb (the draggable part) */
-  ::-webkit-scrollbar-thumb {
-    background: #888;   /* Default thumb color */
-    border-radius: 10px; /* Rounded corners */
-    border: 3px solid #f1f1f1;  /* Space between thumb and track */
-  }
-  
-  /* Style the thumb when hovered */
-  ::-webkit-scrollbar-thumb:hover {
-    background: #555;   /* Darker color when hovered */
-  }
-  
-  /* Optional: Style for horizontal scrollbar */
-  ::-webkit-scrollbar-thumb:horizontal {
-    background: #888;   /* Horizontal thumb color */
-  }
-  
-  /* Optional: Style for the horizontal scrollbar track */
-  ::-webkit-scrollbar-track:horizontal {
-    background: #f1f1f1;  /* Horizontal track color */
-  }
-  
+  width: 12px; /* Vertical scrollbar width */
+  height: 12px; /* Horizontal scrollbar height */
+}
+
+/* Style the scrollbar track (background) */
+::-webkit-scrollbar-track {
+  background: #f1f1f1; /* Light grey track */
+  border-radius: 10px; /* Rounded corners */
+}
+
+/* Style the scrollbar thumb (the draggable part) */
+::-webkit-scrollbar-thumb {
+  background: #888; /* Default thumb color */
+  border-radius: 10px; /* Rounded corners */
+  border: 3px solid #f1f1f1; /* Space between thumb and track */
+}
+
+/* Style the thumb when hovered */
+::-webkit-scrollbar-thumb:hover {
+  background: #555; /* Darker color when hovered */
+}
+
+/* Optional: Style for horizontal scrollbar */
+::-webkit-scrollbar-thumb:horizontal {
+  background: #888; /* Horizontal thumb color */
+}
+
+/* Optional: Style for the horizontal scrollbar track */
+::-webkit-scrollbar-track:horizontal {
+  background: #f1f1f1; /* Horizontal track color */
+}

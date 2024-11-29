@@ -14,7 +14,7 @@ function getClosestLocation(latitude, longitude) {
   locations.forEach((location) => {
     const distance = haversine(
       { latitude, longitude },
-      { latitude: location.latitude, longitude: location.longitude }
+      { latitude: location.latitude, longitude: location.longitude },
     );
 
     // Convert radius to meters and check if within the radius

@@ -2,9 +2,9 @@ const mongoose = require("mongoose");
 
 const sensorDataSchema = new mongoose.Schema({
   deviceID: { type: String, required: true },
-  location: { 
+  location: {
     type: mongoose.Schema.Types.Mixed, // This allows you to store any object
-    required: true 
+    required: true,
   },
   PM25: { type: Number, required: true },
   PM10: { type: Number, required: true },

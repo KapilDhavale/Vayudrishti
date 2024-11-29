@@ -12,6 +12,5 @@ curl -X POST http://localhost:3001/data -H "Content-Type: application/json" -d "
 Latest 24/11/24
 curl -X POST http://localhost:3001/data -H "Content-Type: application/json" -d "{\"deviceID\":\"device123\",\"PM25\":35,\"PM10\":60,\"NO2\":10,\"SO2\":5,\"CO\":0.5,\"O3\":45,\"temperature\":25,\"humidity\":60,\"location\":{\"latitude\":28.7041,\"longitude\":77.1025}}"
 
-
 Latest 25/11/24
 curl -X POST http://localhost:3001/data -H "Content-Type: application/json" -d "{\"deviceID\":\"bus-003\",\"latitude\":28.6375,\"longitude\":77.1130,\"PM25\":92,\"PM10\":125,\"NO2\":50,\"SO2\":18,\"CO\":1.0,\"O3\":60}"

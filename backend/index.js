@@ -7,6 +7,7 @@ const SensorData = require("./models/model"); // Import the Mongoose model
 const { calculateAQI } = require("./services/aqiCalculation"); // Import AQI calculation function
 const locations = require("./config/locations"); // Predefined locations
 const { getClosestLocation } = require("./utils/utils"); // Helper function for closest location
+const pollutionRoutes = require("./routes/social-analyticsRoutes"); // Import pollution-related routes
 require("dotenv").config();
 
 const app = express();
@@ -35,6 +36,25 @@ io.on("connection", (socket) => {
   socket.emit("initialData", { message: "Welcome, no data yet" });
 });
 
+// Use pollution-related routes
+app.use("/api/pollution", pollutionRoutes);
+
+// Route to fetch all feedback messages
+app.get("/api/pollution/feedbacks", async (req, res) => {
+  try {
+    // Fetch feedback messages from the Pollution model
+    const feedbacks = await mongoose
+      .model("Pollution")
+      .find({ feedbackMessage: { $exists: true, $ne: null } })
+      .select("feedbackMessage")
+      .sort({ timestamp: -1 });
+    res.json(feedbacks);
+  } catch (error) {
+    console.error("Error fetching feedbacks:", error);
+    res.status(500).json({ message: "Error fetching feedbacks" });
+  }
+});
+
 // POST endpoint to receive new sensor data and calculate AQI
 app.post("/data", async (req, res) => {
   try {
@@ -45,7 +65,7 @@ app.post("/data", async (req, res) => {
     const closestLocation = getClosestLocation(
       newData.latitude,
       newData.longitude,
-      locations
+      locations,
     );
 
     if (!closestLocation) {
