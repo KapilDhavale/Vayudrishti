@@ -1,16 +1,21 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import "./Navbar.css"; // Import Navbar-specific CSS
 
 const Navbar = ({ isAuthenticated }) => {
   const navigate = useNavigate();
+  const location = useLocation();
 
-  // If not authenticated, redirect to login page
+  // Hide Navbar on the Landing Page or root route
+  if (location.pathname === "/" || location.pathname === "/landing") {
+    return null;
+  }
+
   const handleNavigation = (path) => {
     if (isAuthenticated) {
       navigate(path);
     } else {
-      navigate("/login"); // Redirect to login page if not authenticated
+      navigate("/login");
     }
   };
 
@@ -18,7 +23,7 @@ const Navbar = ({ isAuthenticated }) => {
     if (isAuthenticated) {
       navigate("/dashboard");
     } else {
-      navigate("/login"); // Redirect to login if not authenticated
+      navigate("/login");
     }
   };
 
@@ -28,42 +33,35 @@ const Navbar = ({ isAuthenticated }) => {
 
   return (
     <div className="navbar">
-     <div id="nav-logo" onClick={handleLogoClick} style={{ cursor: "pointer" }}>
+      <div id="nav-logo" onClick={handleLogoClick} style={{ cursor: "pointer" }}>
         <div id="nav-vayu">Vayu</div>
         <div id="nav-drishti">Drishti</div>
       </div>
       <nav className="navbar-nav">
         <ul className="navbar-links">
           <li>
-            <button
-              onClick={() => handleNavigation("/database")}
-              className="navbar-link"
-            >
+            <button onClick={() => handleNavigation("/database")} className="navbar-link">
               Database
             </button>
           </li>
           <li>
-            <button
-              onClick={() => handleNavigation("/analytics")}
-              className="navbar-link"
-            >
+            <button onClick={() => handleNavigation("/analytics")} className="navbar-link">
               Analytics
             </button>
           </li>
           <li>
-            <button
-              onClick={() => handleNavigation("/maps")}
-              className="navbar-link"
-            >
+            <button onClick={() => handleNavigation("/maps")} className="navbar-link">
               Maps
             </button>
           </li>
           <li>
-            <button
-              onClick={() => handleNavigation("/social-media")}
-              className="navbar-link"
-            >
+            <button onClick={() => handleNavigation("/social-media")} className="navbar-link">
               Social Media Analytics
+            </button>
+          </li>
+          <li>
+            <button onClick={() => handleNavigation("/realtime")} className="navbar-link">
+              Real-Time Data
             </button>
           </li>
         </ul>

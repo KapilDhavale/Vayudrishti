@@ -1,141 +1,285 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import Navbar from "./Navbar"; // Import the Navbar component
-import "./DataDisplay.css";
+import React, { useState, useEffect, useMemo } from 'react';
+import Select from 'react-select';
+import { useNavigate } from 'react-router-dom';
+import io from 'socket.io-client';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import './DataDisplay.css';
 
-const DataDisplay = ({ socket }) => {
-  const [data, setData] = useState([]);
-  const [groupedData, setGroupedData] = useState({});
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+const getGRAPStage = (aqi) => {
+  let stageInfo = { stage: '', color: '', dos: [], donts: [] };
+  if (aqi <= 300) {
+    stageInfo = {
+      stage: 'Stage I',
+      color: 'linear-gradient(to bottom, #FFECB3, #FFC107)',
+      dos: [
+        'Use public transport or carpool to reduce emissions.',
+        'Water plants and sprinkle water on dusty areas around your home.',
+        'Dispose of waste responsibly—avoid burning trash.'
+      ],
+      donts: [
+        'Avoid unnecessary outdoor physical activity, especially for children and the elderly.',
+        'Don’t leave engines idling unnecessarily.',
+        'Refrain from using firecrackers.'
+      ]
+    };
+  } else if (aqi <= 400) {
+    stageInfo = {
+      stage: 'Stage II',
+      color: 'linear-gradient(to bottom, #FFD54F, #FF9800)',
+      dos: [
+        'Limit outdoor activities for children and the elderly.',
+        'Wear a mask if you need to go outside.'
+      ],
+      donts: [
+        'Avoid outdoor physical exertion.',
+        'Refrain from using air-conditioning in non-essential areas.'
+      ]
+    };
+  } else if (aqi <= 450) {
+    stageInfo = {
+      stage: 'Stage III',
+      color: 'linear-gradient(to bottom, #FF8A80, #F44336)',
+      dos: [
+        'Stay indoors as much as possible.',
+        'Keep windows closed to avoid pollutants from entering.'
+      ],
+      donts: [
+        'Avoid all outdoor physical activity.',
+        'Do not burn wood or other materials indoors.'
+      ]
+    };
+  } else {
+    stageInfo = {
+      stage: 'Stage IV',
+      color: 'linear-gradient(to bottom, #CE93D8, #6A1B9A)',
+      dos: [
+        'Stay indoors and avoid any physical exertion.',
+        'Use air purifiers if available.'
+      ],
+      donts: [
+        'Do not leave your home unnecessarily.',
+        'Avoid using private vehicles.'
+      ]
+    };
+  }
+  return stageInfo;
+};
+
+const DataDisplay = () => {
   const navigate = useNavigate();
 
+  // State for real-time AQI data from WebSocket (ws://localhost:3003)
+  const [locationsData, setLocationsData] = useState({});
+  // State for overall (Delhi) AQI data
+  const [overallData, setOverallData] = useState(null);
+  // Default selection is overall
+  const [selectedLocationKey, setSelectedLocationKey] = useState("overall");
+  const [isConnected, setIsConnected] = useState(false);
+
+  // State for hardware data from Socket.IO (http://localhost:3001)
+  const [hardwareData, setHardwareData] = useState(null);
+
+  // Connect to AQI WebSocket server
   useEffect(() => {
-    // Fetch initial data from the backend
-    fetch("http://localhost:3001/data")
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
+    const ws = new WebSocket('ws://localhost:3003');
+    ws.onopen = () => {
+      console.log('AQI WebSocket connected');
+      setIsConnected(true);
+    };
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        // Process only messages with valid location data
+        if (!data.location || data.location.latitude === undefined || data.location.longitude === undefined) {
+          console.log('Ignored message:', data);
+          return;
         }
-        return response.json();
-      })
-      .then((data) => {
-        setData(data);
-        setLoading(false);
-        const grouped = data.reduce((acc, item) => {
-          if (item.location && item.location.name) {
-            const location = item.location.name;
-            if (!acc[location]) {
-              acc[location] = [];
-            }
-            acc[location].push(item);
-          }
-          return acc;
-        }, {});
-        setGroupedData(grouped);
-      })
-      .catch((error) => {
-        console.error("Error fetching data:", error);
-        setError(error);
-        setLoading(false);
-      });
-
-    if (socket) {
-      socket.on("newData", (newData) => {
-        setData((prevData) => {
-          const updatedData = [newData, ...prevData];
-          const updatedGrouped = updatedData.reduce((acc, item) => {
-            if (item.location && item.location.name) {
-              const location = item.location.name;
-              if (!acc[location]) {
-                acc[location] = [];
-              }
-              acc[location].push(item);
-            }
-            return acc;
-          }, {});
-          setGroupedData(updatedGrouped);
-          return updatedData;
-        });
-      });
-    }
-
-    return () => {
-      if (socket) {
-        socket.off("newData");
+        console.log('Received AQI data:', data);
+        // If the message includes overall data, update overallData
+        if (data.overall) {
+          setOverallData(data.overall);
+        }
+        // Round coordinates to 2 decimals and use as key
+        const roundedLat = Number(data.location.latitude.toFixed(2));
+        const roundedLon = Number(data.location.longitude.toFixed(2));
+        const key = `${roundedLat},${roundedLon}`;
+        setLocationsData(prev => ({ ...prev, [key]: data }));
+      } catch (error) {
+        console.error('Error parsing AQI data:', error);
       }
     };
-  }, [socket]);
+    ws.onerror = (error) => {
+      console.error('AQI WebSocket error:', error);
+    };
+    ws.onclose = () => {
+      console.log('AQI WebSocket closed');
+      setIsConnected(false);
+    };
+    return () => {
+      ws.close();
+    };
+  }, []);
 
-  if (loading) {
-    return <p className="loading">Loading...</p>;
-  }
+  // Build dropdown options for location selector with unique names (without coordinates)
+  const locationOptions = useMemo(() => {
+    const labelsMap = {};
+    const overallOption = { value: "overall", label: "Delhi (Overall)" };
+    const options = [overallOption];
+    Object.keys(locationsData).forEach((key) => {
+      const loc = locationsData[key].location;
+      let label = loc.name; // Only the name
+      // If the label already exists, append a suffix to make it unique.
+      if (labelsMap[label]) {
+        labelsMap[label] += 1;
+        label = `${label} - ${labelsMap[label]}`;
+      } else {
+        labelsMap[label] = 1;
+      }
+      options.push({
+        value: key,
+        label,
+      });
+    });
+    return options;
+  }, [locationsData]);
 
-  if (error) {
-    return <p className="error">Error loading data: {error.message}</p>;
-  }
+  const handleLocationChange = (selectedOption) => {
+    setSelectedLocationKey(selectedOption.value);
+  };
+
+  // Determine which data to show
+  const selectedData = selectedLocationKey === "overall" ? overallData : locationsData[selectedLocationKey];
+  const grapInfo = selectedData ? getGRAPStage(selectedData.AQI) : null;
+
+  // Connect to hardware data Socket.IO server
+  useEffect(() => {
+    const socketHardware = io("http://localhost:3001");
+    socketHardware.on("hardwareData", (data) => {
+      console.log("Received hardware data:", data);
+      setHardwareData(data);
+    });
+    return () => {
+      socketHardware.disconnect();
+    };
+  }, []);
+
+  // Logout handler
+  const handleLogout = () => {
+    navigate("/logout");
+  };
 
   return (
-    <div className="dashboard-container">
-      <div className="sidebar">
-        <h4 className="sidebar-title">Menu</h4>
-        <ul className="sidebar-menu">
-          <li>
-            <button
-              onClick={() => navigate("/logout")}
-              className="btn btn-danger sidebar-btn"
-            >
-              Logout
-            </button>
-          </li>
-          <li>
-            <button
-              onClick={() => navigate("/cards")}
-              className="btn btn-primary sidebar-btn"
-            >
-              View Cards
-            </button>
-          </li>
-        </ul>
+    <div className="data-display">
+      {/* Header with Logo and Logout Button */}
+      <div className="header">
+       
+        <button className="logout-btn" onClick={handleLogout}>
+          Logout
+        </button>
       </div>
 
-      <div className="main-content">
-        {/* Use the Navbar component */}
-        <Navbar />
-
-        <div className="dashboard-content">
-          {Object.keys(groupedData).length === 0 ? (
-            <p className="no-data">No data available</p>
-          ) : (
-            <div className="location-container">
-              {Object.keys(groupedData).map((location, index) => (
-                <div key={index} className="location-group card">
-                  <h3 className="location-title">{location}</h3>
-                  <div className="data-grid">
-                    {groupedData[location].map((item, index) => (
-                      <div key={index} className="data-card card">
-                        <h4 className="data-title">
-                          Device ID: {item.deviceID}
-                        </h4>
-                        <ul className="data-list">
-                          <li className="data-item">
-                            <strong>AQI:</strong> {item.AQI}
-                          </li>
-                          {/* Other data points */}
-                          <li className="data-item">
-                            <strong>Timestamp:</strong>{" "}
-                            {new Date(item.timestamp).toLocaleString()}
-                          </li>
-                        </ul>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+      {/* GRAP Cards Section */}
+      <div id="grap-cards">
+        <div id="card-1" style={{ background: 'linear-gradient(to bottom, #FFECB3, #FFC107)' }}>
+          <div id="stages-head-1" style={{ backgroundColor: '#FFFF00' }}>Stage I</div>
+          <div id="stages-value-1">AQI less than 300</div>
+        </div>
+        <div id="card-2" style={{ background: 'linear-gradient(to bottom, #FFD54F, #FF9800)' }}>
+          <div id="stages-head-2" style={{ backgroundColor: '#FFA500' }}>Stage II</div>
+          <div id="stages-value-2">AQI 301-400</div>
+        </div>
+        <div id="card-3" style={{ background: 'linear-gradient(to bottom, #FF8A80, #F44336)' }}>
+          <div id="stages-head-3" style={{ backgroundColor: '#FF0000' }}>Stage III</div>
+          <div id="stages-value-3">AQI 401-450</div>
+        </div>
+        <div id="card-4" style={{ background: 'linear-gradient(to bottom, #CE93D8, #6A1B9A)' }}>
+          <div id="stages-head-4" style={{ backgroundColor: '#8E47B1' }}>Stage IV</div>
+          <div id="stages-value-4">AQI more than 450</div>
         </div>
       </div>
+
+      {/* AQI Status Section */}
+      <div className="aqi-status-section" style={{ background: grapInfo ? grapInfo.color : '#fff' }}>
+        <h3>
+          {selectedData && selectedLocationKey === "overall"
+            ? `Delhi Overall AQI Status`
+            : selectedData && selectedData.location
+            ? `${selectedData.location.name} AQI Status`
+            : 'Waiting for data...'}
+        </h3>
+        {selectedData ? (
+          <div className="aqi-status">
+            <div className="aqi-left">
+              <h4>AQI: {selectedData.AQI}</h4>
+            </div>
+            <div className="aqi-right">
+              <p>GRAP: {grapInfo ? grapInfo.stage : 'Loading...'}</p>
+              <p>Worst Pollutant: {selectedData.worstPollutant}</p>
+              <p>
+                Condition: {selectedData.AQI <= 100
+                  ? 'Good'
+                  : selectedData.AQI <= 200
+                  ? 'Moderate'
+                  : selectedData.AQI <= 300
+                  ? 'Unhealthy for Sensitive Groups'
+                  : 'Hazardous'}
+              </p>
+              <p>Calculated: {selectedData.calculationTime || 'N/A'}</p>
+            </div>
+          </div>
+        ) : (
+          <p>Waiting for data...</p>
+        )}
+      </div>
+
+      {/* Searchable Location Selector */}
+      <div className="container custom-container">
+        <h1 className="text-center mb-4">Real-Time AQI Data by Parameter</h1>
+        {!isConnected && (
+          <div className="alert alert-warning text-center" role="alert">
+            Connecting to WebSocket...
+          </div>
+        )}
+        {locationOptions.length > 0 && (
+          <div className="mb-4">
+            <label style={{ marginRight: '10px' }}>Select Location: </label>
+            <Select
+              options={locationOptions}
+              onChange={handleLocationChange}
+              defaultValue={locationOptions.find(option => option.value === selectedLocationKey)}
+              placeholder="Search location..."
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Do's and Don'ts Section */}
+      <div className="container custom-container">
+        <div className="row">
+          <div className="col-md-6">
+            <h4>Do's</h4>
+            <div className="dos-box">
+              <ul>
+                {grapInfo && grapInfo.dos.map((item, index) => (
+                  <li key={index}>{item}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+          <div className="col-md-6">
+            <h4>Don'ts</h4>
+            <div className="donts-box">
+              <ul>
+                {grapInfo && grapInfo.donts.map((item, index) => (
+                  <li key={index}>{item}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+     
     </div>
   );
 };
