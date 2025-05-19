@@ -1,3 +1,48 @@
+🌬️ Vayudrishti – Smart Air Quality Monitoring System
+
+Finalist – Smart India Hackathon 2024
+
+Vayudrishti is a real-time air quality monitoring system that deploys IoT-based AQI sensors on public transport (like buses) and high-rise buildings. It captures air quality and GPS data, maps the readings to predefined zones, and displays real-time AQI analytics for micro-locations. Built for urban pollution awareness, actionable data, and sustainable city planning.
+
+---
+
+🧠 Problem Statement
+
+The technological solutions for capturing AQI values through mobile and other forms of stations.
+
+---
+
+🎯 Objectives
+
+- Monitor pollution levels dynamically via mobile sensors
+- Map moving GPS data to fixed geographical zones
+- Provide live AQI updates to citizens and authorities
+- Enable data-driven decisions for traffic, health, and urban planning
+
+---
+
+🧩 Key Features
+
+- 📍 Zone Mapping – Maps live GPS location of the device to nearest predefined AQI zone  
+- 🌐 Live AQI Dashboard – Real-time air quality monitoring via WebSockets  
+- 🔒 Role-based Access – Firebase authentication for users and admins  
+- 🧾 Historical Data – Stores sensor logs and past AQI for trends  
+- 🚍 Mobile + Fixed Nodes – Designed for both buses (mobile) and towers (static)
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
 This it the old curl request to be sent
 curl -X POST http://localhost:3001/data -H "Content-Type: application/json" -d "{\"sensorId\": \"12345\", \"temperature\": 24.5, \"humidity\": 55, \"timestamp\": \"2024-08-31T12:00:00Z\"}"
 
