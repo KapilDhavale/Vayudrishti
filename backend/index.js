@@ -5,49 +5,72 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 
-// Import your models and routes
-const SensorData = require("./models/model"); // Your sensor data model
-const AQICalculator = require("./models/aqiCalc"); // AQI Calculation Module
-const pollutionRoutes = require("./routes/social-analyticsRoutes"); // Social analytics routes
-const { getClosestLocation } = require("./utils/utils"); // Helper function for closest location
+// Load environment variables
 require("dotenv").config();
+
+// Automatically run simulateData.js when this file is executed
+require("./simulateData");
+
+// Import your models and routes
+const SensorData = require("./models/model");            // Your sensor data Mongoose model
+const AQICalculator = require("./models/aqiCalc");      // Module to calculate AQI
+const pollutionRoutes = require("./routes/social-analyticsRoutes"); 
+const { getClosestLocation } = require("./utils/utils");
+
+// Build list of allowed origins
+const allowedOrigins = [
+  "http://localhost:3000",
+  "http://localhost:3002",
+  process.env.FRONTEND_URL // e.g. https://vayudrishti-frontend.onrender.com
+].filter(Boolean);
 
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: ["http://localhost:3000", "http://localhost:3002"], // Frontend clients
+    origin: allowedOrigins,
     methods: ["GET", "POST"],
-  },
+    credentials: true
+  }
 });
 
-// Middleware
-app.use(cors());
+// Middleware: dynamic CORS
+app.use(cors({
+  origin: (origin, callback) => {
+    // allow non-browser requests (e.g., mobile apps, curl)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    callback(new Error("CORS policy: This origin is not allowed."));
+  },
+  methods: ["GET", "POST"],
+  credentials: true
+}));
+
 app.use(bodyParser.json());
 app.use(express.json());
 
-// MongoDB Connection
-const mongoUri = process.env.MONGO_URI;
-mongoose
-  .connect(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log("Connected to MongoDB"))
-  .catch((err) => console.error("MongoDB connection error:", err));
+// Connect to MongoDB
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
+.then(() => console.log("Connected to MongoDB"))
+.catch(err => console.error("MongoDB connection error:", err));
 
-// In-memory storage for sensor data (optional, used in addition to MongoDB)
+// In-memory storage (optional)
 let sensorDataArray = [];
 let locationAQI = {};
 
-// Create an instance of AQICalculator
+// AQI calculator instance
 const aqiCalculator = new AQICalculator();
 
-// WebSocket connection handler
-io.on("connection", (socket) => {
+// Socket.IO connection handler
+io.on("connection", socket => {
   console.log("New WebSocket connection");
-  
-  // Send initial data on connection
   socket.emit("initialData", { message: "Welcome, waiting for data..." });
 
-  // Optionally, you can respond to requests for the latest data
   socket.on("requestLatestData", () => {
     if (sensorDataArray.length > 0) {
       socket.emit("latestData", sensorDataArray[sensorDataArray.length - 1]);
@@ -55,134 +78,102 @@ io.on("connection", (socket) => {
   });
 });
 
-// Use pollution-related routes (e.g., for social analytics)
+// Mount social analytics routes
 app.use("/api/pollution", pollutionRoutes);
 
-// Root Route (for debugging/info)
+// Root route
 app.get("/", (req, res) => {
   res.status(200).json({
     message: "Welcome to the AQI Monitoring Server!",
     endpoints: {
-      sensorData: {
-        method: "POST",
-        url: "/sensor-data",
-        description: "Send sensor data to calculate AQI and broadcast to clients."
-      },
-      getAQI: {
-        method: "GET",
-        url: "/aqi",
-        description: "Retrieve latest AQI for all locations."
-      },
-      getRecentData: {
-        method: "GET",
-        url: "/data",
-        description: "Retrieve recent sensor data."
-      },
-      feedbacks: {
-        method: "GET",
-        url: "/api/pollution/feedbacks",
-        description: "Retrieve feedback messages."
-      }
+      sensorData: { method: "POST", url: "/sensor-data", description: "Send sensor data to calculate AQI and broadcast to clients." },
+      getAQI:      { method: "GET",  url: "/aqi",         description: "Retrieve latest AQI for all locations." },
+      getRecentData: { method: "GET", url: "/data",       description: "Retrieve recent sensor data." },
+      feedbacks:     { method: "GET", url: "/api/pollution/feedbacks", description: "Retrieve feedback messages." },
     }
   });
 });
 
-// POST endpoint to receive hardware data and broadcast via Socket.IO
+// POST: hardware data
 app.post("/api/hardware", (req, res) => {
   try {
-    const hardwareData = req.body;
-    console.log("Received from hardware:", hardwareData);
-
-    const newSensorData = {
-      timestamp: new Date().toISOString(),
-      temperature: hardwareData.temperature,
-      humidity: hardwareData.humidity,
-      mq7: hardwareData.mq7,
-      mq135: hardwareData.mq135,
-    };
-
-    // Store in memory (optional)
+    const { temperature, humidity, mq7, mq135 } = req.body;
+    const newSensorData = { timestamp: new Date().toISOString(), temperature, humidity, mq7, mq135 };
     sensorDataArray.push(newSensorData);
-    
-    // Emit hardware data via Socket.IO
     io.emit("hardwareData", newSensorData);
-
-    res.status(200).json({
-      message: "Hardware data received successfully",
-      data: newSensorData,
-    });
+    res.status(200).json({ message: "Hardware data received successfully", data: newSensorData });
   } catch (error) {
     console.error("Error processing hardware data:", error);
     res.status(500).json({ message: "Error processing hardware data" });
   }
 });
 
-// POST endpoint to receive sensor data, calculate AQI, store in MongoDB, and broadcast via Socket.IO
+// POST: sensor data → AQI calc, save, broadcast
 app.post("/sensor-data", async (req, res) => {
   const { sensor_id, name, latitude, longitude, pollutants } = req.body;
-  
   if (!sensor_id || !latitude || !longitude || !pollutants) {
     return res.status(400).json({ message: "Missing required data" });
   }
-  
-  const requiredPollutants = ["PM10", "PM25", "NO2", "SO2", "CO", "O3", "NH3", "Pb"];
-  for (const pollutant of requiredPollutants) {
-    if (!pollutants.hasOwnProperty(pollutant)) {
-      return res.status(400).json({ message: `Missing pollutant: ${pollutant}` });
+
+  const required = ["PM10","PM25","NO2","SO2","CO","O3","NH3","Pb"];
+  for (const p of required) {
+    if (!pollutants.hasOwnProperty(p)) {
+      return res.status(400).json({ message: `Missing pollutant: ${p}` });
     }
   }
-  
+
   try {
-    const locationKey = `${latitude},${longitude}`;
     const sensorData = { name: name || null, latitude, longitude, pollutants };
     const aqiData = aqiCalculator.calculateFinalAQI(sensorData);
-  
-    if (aqiData) {
-      locationAQI[locationKey] = aqiData;
-  
-      const payload = {
-        location: { name: aqiData.locationName, latitude, longitude },
-        AQI: aqiData.AQI,
-        worstPollutant: aqiData.worstPollutant,
-        subIndices: aqiData.subIndices,
-        overall: aqiData.overall,
-        calculationTime: aqiData.calculationTime,
-      };
-  
-      // Emit AQI data via WebSocket
-      io.emit("aqiUpdate", payload);
-  
-      // Create a new SensorData document (save to MongoDB)
-      const sensorDataDoc = new SensorData({
-        ...req.body,
-        location: getClosestLocation(latitude, longitude, locations),
-        AQI: aqiData.AQI,
-        timestamp: new Date().toISOString()
-      });
-      await sensorDataDoc.save();
-  
-      // Also store in memory (optional)
-      sensorDataArray.push(sensorDataDoc);
-  
-      console.log("Received new data and calculated AQI:", payload);
-  
-      res.status(200).json({
-        message: "AQI calculated and broadcasted",
-        result: payload
-      });
-    } else {
-      res.status(500).json({ message: "AQI calculation failed" });
-    }
+    if (!aqiData) throw new Error("AQI calculation returned no data");
+
+    const key = `${latitude},${longitude}`;
+    locationAQI[key] = aqiData;
+
+    const payload = {
+      location: { name: aqiData.locationName, latitude, longitude },
+      AQI: aqiData.AQI,
+      worstPollutant: aqiData.worstPollutant,
+      subIndices: aqiData.subIndices,
+      overall: aqiData.overall,
+      calculationTime: aqiData.calculationTime,
+    };
+
+    io.emit("aqiUpdate", payload);
+
+    const closestLocation = getClosestLocation(latitude, longitude, require("./config/locations")) || { name: "Unknown" };
+    const doc = new SensorData({
+      sensor_id,
+      deviceID: sensor_id,
+      name,
+      latitude,
+      longitude,
+      PM10: pollutants.PM10,
+      PM25: pollutants.PM25,
+      NO2: pollutants.NO2,
+      SO2: pollutants.SO2,
+      CO: pollutants.CO,
+      O3: pollutants.O3,
+      NH3: pollutants.NH3,
+      Pb: pollutants.Pb,
+      location: closestLocation,
+      AQI: aqiData.AQI,
+      timestamp: new Date().toISOString(),
+    });
+    await doc.save();
+    sensorDataArray.push(doc);
+
+    console.log("Received new sensor data and calculated AQI:", payload);
+    res.status(200).json({ message: "AQI calculated and broadcasted", result: payload });
   } catch (error) {
-    console.error("Error calculating AQI:", error.message);
+    console.error("Error calculating AQI:", error);
     res.status(500).json({ message: "Internal Server Error", error: error.message });
   }
 });
 
-// GET endpoint to retrieve all feedback messages from the Pollution model
+// GET: feedback messages
 app.get("/api/pollution/feedbacks", async (req, res) => {
   try {
-    // Assuming the "Pollution" model is registered
     const feedbacks = await mongoose
       .model("Pollution")
       .find({ feedbackMessage: { $exists: true, $ne: null } })
@@ -195,7 +186,7 @@ app.get("/api/pollution/feedbacks", async (req, res) => {
   }
 });
 
-// GET endpoint to fetch recent sensor data (last 100 records)
+// GET: recent sensor data
 app.get("/data", async (req, res) => {
   try {
     const data = await SensorData.find().sort({ timestamp: -1 }).limit(100);
@@ -206,7 +197,7 @@ app.get("/data", async (req, res) => {
   }
 });
 
-// GET endpoint to retrieve AQI data for all locations
+// GET: all AQI locations
 app.get("/aqi", (req, res) => {
   res.status(200).json({ message: "AQI Data", locations: locationAQI });
 });

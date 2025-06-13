@@ -68,55 +68,55 @@ const getGRAPStage = (aqi) => {
 const DataDisplay = () => {
   const navigate = useNavigate();
 
-  // State for real-time AQI data from WebSocket (ws://localhost:3003)
+  // We'll use one Socket.IO connection on port 3001 for both AQI and hardware updates.
+  const [socket, setSocket] = useState(null);
+  
+  // State for real-time AQI data from Socket.IO ("aqiUpdate" event)
   const [locationsData, setLocationsData] = useState({});
-  // State for overall (Delhi) AQI data
   const [overallData, setOverallData] = useState(null);
-  // Default selection is overall
   const [selectedLocationKey, setSelectedLocationKey] = useState("overall");
   const [isConnected, setIsConnected] = useState(false);
-
-  // State for hardware data from Socket.IO (http://localhost:3001)
+  
+  // State for hardware data from Socket.IO ("hardwareData" event)
   const [hardwareData, setHardwareData] = useState(null);
 
-  // Connect to AQI WebSocket server
   useEffect(() => {
-    const ws = new WebSocket('ws://localhost:3003');
-    ws.onopen = () => {
-      console.log('AQI WebSocket connected');
+    // Create a single Socket.IO connection to the backend on port 3001
+    const socketInstance = io("http://localhost:3001");
+    setSocket(socketInstance);
+
+    socketInstance.on("connect", () => {
+      console.log("Socket.IO connected:", socketInstance.id);
       setIsConnected(true);
-    };
-    ws.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        // Process only messages with valid location data
-        if (!data.location || data.location.latitude === undefined || data.location.longitude === undefined) {
-          console.log('Ignored message:', data);
-          return;
-        }
-        console.log('Received AQI data:', data);
-        // If the message includes overall data, update overallData
-        if (data.overall) {
-          setOverallData(data.overall);
-        }
-        // Round coordinates to 2 decimals and use as key
-        const roundedLat = Number(data.location.latitude.toFixed(2));
-        const roundedLon = Number(data.location.longitude.toFixed(2));
-        const key = `${roundedLat},${roundedLon}`;
-        setLocationsData(prev => ({ ...prev, [key]: data }));
-      } catch (error) {
-        console.error('Error parsing AQI data:', error);
+    });
+
+    // Listen for AQI updates
+    socketInstance.on("aqiUpdate", (data) => {
+      console.log("Received AQI update:", data);
+      // If the message includes overall data, update overallData
+      if (data.overall) {
+        setOverallData(data.overall);
       }
-    };
-    ws.onerror = (error) => {
-      console.error('AQI WebSocket error:', error);
-    };
-    ws.onclose = () => {
-      console.log('AQI WebSocket closed');
+      // Use latitude and longitude to build a key
+      const roundedLat = Number(data.location.latitude.toFixed(2));
+      const roundedLon = Number(data.location.longitude.toFixed(2));
+      const key = `${roundedLat},${roundedLon}`;
+      setLocationsData(prev => ({ ...prev, [key]: data }));
+    });
+
+    // Listen for hardware data updates
+    socketInstance.on("hardwareData", (data) => {
+      console.log("Received hardware data:", data);
+      setHardwareData(data);
+    });
+
+    socketInstance.on("disconnect", () => {
+      console.log("Socket.IO disconnected");
       setIsConnected(false);
-    };
+    });
+
     return () => {
-      ws.close();
+      socketInstance.disconnect();
     };
   }, []);
 
@@ -148,20 +148,9 @@ const DataDisplay = () => {
   };
 
   // Determine which data to show
-  const selectedData = selectedLocationKey === "overall" ? overallData : locationsData[selectedLocationKey];
+  const selectedData =
+    selectedLocationKey === "overall" ? overallData : locationsData[selectedLocationKey];
   const grapInfo = selectedData ? getGRAPStage(selectedData.AQI) : null;
-
-  // Connect to hardware data Socket.IO server
-  useEffect(() => {
-    const socketHardware = io("http://localhost:3001");
-    socketHardware.on("hardwareData", (data) => {
-      console.log("Received hardware data:", data);
-      setHardwareData(data);
-    });
-    return () => {
-      socketHardware.disconnect();
-    };
-  }, []);
 
   // Logout handler
   const handleLogout = () => {
@@ -172,7 +161,6 @@ const DataDisplay = () => {
     <div className="data-display">
       {/* Header with Logo and Logout Button */}
       <div className="header">
-       
         <button className="logout-btn" onClick={handleLogout}>
           Logout
         </button>
@@ -237,7 +225,7 @@ const DataDisplay = () => {
         <h1 className="text-center mb-4">Real-Time AQI Data by Parameter</h1>
         {!isConnected && (
           <div className="alert alert-warning text-center" role="alert">
-            Connecting to WebSocket...
+            Connecting to Socket.IO...
           </div>
         )}
         {locationOptions.length > 0 && (
@@ -278,8 +266,6 @@ const DataDisplay = () => {
           </div>
         </div>
       </div>
-
-     
     </div>
   );
 };

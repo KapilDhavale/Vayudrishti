@@ -1,4 +1,6 @@
 const axios = require("axios");
+require("dotenv").config();
+
 const locationData = [
   {
     name: "Anand Vihar",
@@ -322,28 +324,23 @@ const locationData = [
   },
 ];
 
-// Hourly AQI baselines for Delhi
 const hourlyAQIBaselines = [
   200, 195, 190, 185, 180, 175, 170, 165, 160, 155, 150, 145, 140, 150, 160, 170, 180, 190, 200, 210, 220, 230, 240, 250,
 ];
 
-// Store last generated values for smoothing
 let lastGeneratedValues = {};
 
-// Utility for IST timestamps
 const getISTTimestamp = () => {
   const now = new Date();
   now.setMinutes(now.getMinutes() + 330); // Convert UTC to IST
-  return now.toISOString().replace("T", " ").split(".")[0]; // Format to YYYY-MM-DD HH:mm:ss
+  return now.toISOString().replace("T", " ").split(".")[0];
 };
 
-// Utility to get hourly AQI baseline
 const getHourlyBaseline = () => {
   const hour = new Date().getHours();
   return hourlyAQIBaselines[hour];
 };
 
-// Generate pollutant data with smoothing, and include the location name
 const generateDataForLocation = (location) => {
   const { name, latitudeRange, longitudeRange, pollutants } = location;
   const baselineAQI = getHourlyBaseline();
@@ -351,19 +348,16 @@ const generateDataForLocation = (location) => {
   const randomPollutants = Object.keys(pollutants).reduce((result, key) => {
     const [min, max] = pollutants[key];
     const baseValue = Math.random() * (max - min) + min;
-
-    // Smooth changes
     const lastValue = lastGeneratedValues[key] || baseValue;
     const smoothedValue = lastValue + Math.min(Math.max(baseValue - lastValue, -1), 1);
-
-    lastGeneratedValues[key] = smoothedValue; // Update the last value
-    result[key] = smoothedValue * (baselineAQI / 200); // Scale to AQI baseline
+    lastGeneratedValues[key] = smoothedValue;
+    result[key] = smoothedValue * (baselineAQI / 200);
     return result;
   }, {});
 
   return {
     sensor_id: `sensor_${Math.floor(Math.random() * 1000)}`,
-    name, // include the location name
+    name,
     latitude: Math.random() * (latitudeRange[1] - latitudeRange[0]) + latitudeRange[0],
     longitude: Math.random() * (longitudeRange[1] - longitudeRange[0]) + longitudeRange[0],
     timestamp: getISTTimestamp(),
@@ -371,25 +365,20 @@ const generateDataForLocation = (location) => {
   };
 };
 
-// Send data to the server
 const sendData = async (data) => {
   try {
-    const response = await axios.post("http://localhost:3003/sensor-data", data);
+    const backendURL = process.env.BACKEND_URL// fallback added
+    const response = await axios.post(`${backendURL}/sensor-data`, data);
     console.log("Response from server:", response.data);
   } catch (error) {
     console.error("Error sending data:", error.response?.data || error.message);
   }
 };
-
-// Generate and send data
 const generateData = () => {
   const randomLocation = locationData[Math.floor(Math.random() * locationData.length)];
   const data = generateDataForLocation(randomLocation);
-
   console.log("Generated Data:", data);
   sendData(data);
-
-  // Generate data every random interval between 0 and 30 seconds (30000 ms)
   const randomDelay = Math.floor(Math.random() * 30000);
   setTimeout(generateData, randomDelay);
 };
