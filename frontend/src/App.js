@@ -32,7 +32,7 @@ function App() {
       if (user) {
         setIsAuthenticated(true);
         if (!socket) {
-          const socketInstance = io("http://localhost:3001"); // Adjust backend URL if needed
+          const socketInstance = io("https://vayudrishti-backend.onrender.com"); // Adjust backend URL if needed
           setSocket(socketInstance);
         }
       } else {

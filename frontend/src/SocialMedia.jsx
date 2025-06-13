@@ -48,7 +48,7 @@ const SocialMedia = () => {
   const fetchAggregateData = async () => {
     try {
       const response = await fetch(
-        "http://localhost:3001/api/pollution/aggregate",
+        "http://https://vayudrishti-backend.onrender.com/api/pollution/aggregate",
       );
       if (response.ok) {
         const data = await response.json();
@@ -64,7 +64,7 @@ const SocialMedia = () => {
 
   const fetchFeedbacks = async () => {
     try {
-      const response = await fetch("http://localhost:3001/api/pollution/feedbacks");
+      const response = await fetch("https://vayudrishti-backend.onrender.com/api/pollution/feedbacks");
       if (response.ok) {
         const data = await response.json();
         console.log("Fetched Feedbacks:", data); // Debugging log
@@ -130,7 +130,7 @@ const SocialMedia = () => {
     };
 
     try {
-      const response = await fetch("http://localhost:3001/api/pollution", {
+      const response = await fetch("https://vayudrishti-backend.onrender.com/api/pollution", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),

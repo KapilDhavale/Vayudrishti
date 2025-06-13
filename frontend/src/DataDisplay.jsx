@@ -82,7 +82,7 @@ const DataDisplay = () => {
 
   useEffect(() => {
     // Create a single Socket.IO connection to the backend on port 3001
-    const socketInstance = io("http://localhost:3001");
+    const socketInstance = io("https://vayudrishti-backend.onrender.com");
     setSocket(socketInstance);
 
     socketInstance.on("connect", () => {

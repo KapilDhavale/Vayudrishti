@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import io from "socket.io-client";
 import "./RealTimeData.css"; // Ensure you have the CSS file for styling
 
-const socket = io("http://localhost:3001"); // Backend URL
+const socket = io("https://vayudrishti-backend.onrender.com"); // Backend URL
 
 const RealTimeData = () => {
   const [hardwareData, setHardwareData] = useState(null);

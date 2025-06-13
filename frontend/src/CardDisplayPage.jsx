@@ -9,7 +9,7 @@ const CardDisplayPage = () => {
 
   useEffect(() => {
     // Fetch data from the backend based on the location
-    fetch(`http://localhost:3001/data/location/${locationName}`)
+    fetch(`https://vayudrishti-backend.onrender.com/data/location/${locationName}`)
       .then((response) => {
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
