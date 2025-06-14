@@ -88,7 +88,7 @@ const SocialMedia = () => {
       }
 
       const response = await fetch(
-        `https://newsapi.org/v2/everything?q=pollution+delhi&sources=the-times-of-india&apiKey=${apiKey}`,
+        `https://newsapi.org/v2/everything?q=pollution+delhi&language=en&apiKey=${apiKey}`,
       );
       if (response.ok) {
         const data = await response.json();
