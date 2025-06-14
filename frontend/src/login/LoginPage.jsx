@@ -1,18 +1,21 @@
 // src/login/LoginPage.js
 import React, { useState } from "react";
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { useNavigate } from "react-router-dom";
+import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebase-config";
 import "./LoginPage.css";
 
 function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
   const handleLogin = (e) => {
     e.preventDefault();
     signInWithEmailAndPassword(auth, email, password)
       .then(() => {
-        window.location.href = "/dashboard"; // Redirect to dashboard directly
+        // Client-side navigation—no full page reload
+        navigate("/dashboard");
       })
       .catch((error) => {
         console.error("Error:", error.message);
