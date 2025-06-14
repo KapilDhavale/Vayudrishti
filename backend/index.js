@@ -202,6 +202,11 @@ app.get("/aqi", (req, res) => {
   res.status(200).json({ message: "AQI Data", locations: locationAQI });
 });
 
+
+const newsRoutes = require("./routes/newsRoutes");
+app.use("/api", newsRoutes);
+
+
 // Start the server
 server.listen(3001, () => {
   console.log("Server listening on port 3001");

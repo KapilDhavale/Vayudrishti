@@ -77,30 +77,19 @@ const SocialMedia = () => {
     }
   };
 
-  // Fetch news data
   const fetchNews = async () => {
     try {
-      const apiKey = "06ae1785f49a4d91a41654742df40235";
-      console.log("API Key:", apiKey); // Fetch from the environment variable
-      if (!apiKey) {
-        console.error("API key is missing!");
-        return;
-      }
-
-      const response = await fetch(
-        `https://newsapi.org/v2/everything?q=pollution+delhi&language=en&apiKey=${apiKey}`,
+      const resp = await fetch(
+        "https://vayudrishti-backend.onrender.com/api/news"
       );
-      if (response.ok) {
-        const data = await response.json();
-        console.log("Fetched News Data:", data); // Debugging log
-        setNewsData(data.articles);
-      } else {
-        console.error("Error fetching news:", response.status);
-      }
-    } catch (error) {
-      console.error("Error fetching news:", error);
+      if (!resp.ok) throw new Error(`Status ${resp.status}`);
+      const data = await resp.json();
+      setNewsData(data.articles);
+    } catch (err) {
+      console.error("Error fetching news via proxy:", err);
     }
   };
+  
 
   // Fetch data on initial load
   useEffect(() => {
