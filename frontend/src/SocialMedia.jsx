@@ -48,7 +48,7 @@ const SocialMedia = () => {
   const fetchAggregateData = async () => {
     try {
       const response = await fetch(
-        "http://https://vayudrishti-backend.onrender.com/api/pollution/aggregate",
+        "https://vayudrishti-backend.onrender.com/api/pollution/aggregate",
       );
       if (response.ok) {
         const data = await response.json();
