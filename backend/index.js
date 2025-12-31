@@ -167,6 +167,9 @@ app.get("/data", async (req, res) => {
 });
 
 // Start the server
-server.listen(3001, () => {
-  console.log("Server listening on port 3001");
+const PORT = process.env.PORT || 3001;
+
+server.listen(PORT, () => {
+  console.log(`Server listening on port ${PORT}`);
 });
+
